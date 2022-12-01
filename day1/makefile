@@ -46,6 +46,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 $(OBJ_DIR):
 	mkdir -p $@
 
+$(BIN_DIR):
+	mkdir -p $@
+
 $(UTIL_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	$(CPP) $(CPPFLAGS) $(PPFLAGS) -c $< -o $@
 
@@ -55,4 +58,5 @@ $(UTIL_OBJ_DIR):
 
 clean:
 	@$(RM) -rfv \
-		$(OBJ_DIR)
+		$(OBJ_DIR)\
+		$(BIN_DIR)
