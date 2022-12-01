@@ -38,6 +38,7 @@ int main()
         cur_cal += std::strtoull(cal_str.c_str(),nullptr,10);
     }
     uint64_t total = std::accumulate(top_cals.cbegin(), top_cals.cend(), 0);
-    std::cout << total << std::endl;
+    std::cout << "part1: " << top_cals[0] << std::endl;
+    std::cout << "part2: " << total << std::endl;
     return 1;
 }
