@@ -2,3 +2,4 @@
 *.code-workspace
 *.o
 bin/*
+day1/bin/day1
