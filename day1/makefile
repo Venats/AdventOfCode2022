@@ -38,16 +38,16 @@ CPPFLAGS= --std=gnu++17 \
 all: $(EXE)
 
 $(EXE): $(OBJ) | $(BIN_DIR) $(UTIL_OBJ)
-	$(CPP) $(UTIL_OBJ) -g $^ -o $@
+	$(CPP) $(UTIL_OBJ) $^ -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CPP) $(CPPFLAGS) $(PPFLAGS) -c -g $< -o $@
+	$(CPP) $(CPPFLAGS) $(PPFLAGS) -c $< -o $@
 
 $(OBJ_DIR):
 	mkdir -p $@
 
 $(UTIL_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CPP) $(CPPFLAGS) $(PPFLAGS) -c -g $< -o $@
+	$(CPP) $(CPPFLAGS) $(PPFLAGS) -c $< -o $@
 
 $(UTIL_OBJ_DIR):
 	mkdir -p $@
