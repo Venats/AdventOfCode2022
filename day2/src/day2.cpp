@@ -5,7 +5,7 @@
 #include<cstdlib>
 #include<optional>
 #include<string>
-#include <FileTokenizer.h>
+#include<FileTokenizer.h>
 
 enum Symbol : uint32_t
 {
@@ -20,6 +20,7 @@ enum Result : uint32_t
     LOSE = 0,
     DRAW = 1,
     WIN = 2,
+    NUM_RESULTS,
 };
 
 std::array<Symbol, Symbol::NUM_SYMBOLS> win_array = {SCISSORS,ROCK,PAPER};
@@ -63,6 +64,26 @@ Symbol me_symbol_from_letter(char letter)
     }
 }
 
+Result me_result_from_letter(char letter)
+{
+    switch(letter)
+    {
+    case('X'):
+        return Result::LOSE;
+    break;
+    case('Y'):
+        return Result::DRAW;
+    break;
+    case('Z'):
+        return Result::WIN;
+    break;
+    default:
+        return Result::NUM_RESULTS;
+    break;
+    }
+}
+
+
 uint32_t symbol_to_points(Symbol symbol)
 {
     return static_cast<uint32_t>(symbol)+1;
@@ -77,16 +98,16 @@ struct Game
 {
     Symbol theirs;
     Symbol mine;
+    Result result_mine;
     Game(const std::string& symbols_str);
-    Result getResult();
-    uint32_t calcTotalPoints();
 };
 
 Game::Game(const std::string& symbols_str) : theirs(them_symbol_from_letter(symbols_str[0])),
-                                    mine(me_symbol_from_letter(symbols_str[2]))
+                                    mine(me_symbol_from_letter(symbols_str[2])),
+                                    result_mine(me_result_from_letter(symbols_str[2]))
 {}
 
-Result Game::getResult()
+Result getResult(Symbol theirs, Symbol mine)
 {
     if(win_array[theirs] == mine)
     {
@@ -99,25 +120,52 @@ Result Game::getResult()
     return WIN;
 }
 
-uint32_t Game::calcTotalPoints()
+Symbol getSymbol(Symbol theirs, Result mine)
 {
-    return symbol_to_points(mine) + result_to_points(getResult());
+    switch(mine)
+    {
+    case(Result::LOSE):
+        return win_array[theirs];
+    break;
+    case(Result::DRAW):
+        return theirs;
+    break;
+    case(Result::WIN):
+        return lose_array[theirs];
+    break;
+    default:
+        return theirs;
+    break;
+    }
+}
+
+uint32_t part1CalcTotalPoints(Symbol theirs, Symbol mine)
+{
+    return symbol_to_points(mine) + result_to_points(getResult(theirs, mine));
+}
+
+uint32_t part2CalcTotalPoints(Symbol theirs, Result mine)
+{
+    return result_to_points(mine) + symbol_to_points(getSymbol(theirs, mine));
 }
 
 int main()
 {
     auto tokenizer = FileTokenizer("../input/day2.txt", '\n');
-    uint32_t total = 0;
+    uint32_t part_1_total = 0;
+    uint32_t part_2_total = 0;
 
     for(std::string game_str = tokenizer.next().value_or("");
          !game_str.empty();
          game_str = tokenizer.next().value_or(""))
     {
         Game game = Game(game_str);
-        total += game.calcTotalPoints();
+        part_1_total += part1CalcTotalPoints(game.theirs, game.mine);
+        part_2_total += part2CalcTotalPoints(game.theirs, game.result_mine);
     }
 
-    std::cout << "part1: " << total << std::endl;
+    std::cout << "part1: " << part_1_total << std::endl;
+    std::cout << "part2: " << part_2_total << std::endl;
     
     return 1;
 }
