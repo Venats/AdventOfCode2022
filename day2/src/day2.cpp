@@ -9,11 +9,21 @@
 
 enum Symbol : uint32_t
 {
-    ROCK     =  1,
-    PAPER    =  2,
-    SCISSORS =  3,
-    UNKNOWN
+    ROCK     =  0,
+    PAPER    =  1,
+    SCISSORS =  2,
+    NUM_SYMBOLS
 };
+
+enum Result : uint32_t
+{
+    LOSE = 0,
+    DRAW = 1,
+    WIN = 2,
+};
+
+std::array<Symbol, Symbol::NUM_SYMBOLS> win_array = {SCISSORS,ROCK,PAPER};
+std::array<Symbol, Symbol::NUM_SYMBOLS> lose_array = {PAPER,SCISSORS,ROCK};
 
 Symbol them_symbol_from_letter(char letter)
 {
@@ -29,7 +39,7 @@ Symbol them_symbol_from_letter(char letter)
         return Symbol::SCISSORS;
     break;
     default:
-        return Symbol::UNKNOWN;
+        return Symbol::NUM_SYMBOLS;
     break;
     }
 }
@@ -48,14 +58,19 @@ Symbol me_symbol_from_letter(char letter)
         return Symbol::SCISSORS;
     break;
     default:
-        return Symbol::UNKNOWN;
+        return Symbol::NUM_SYMBOLS;
     break;
     }
 }
 
 uint32_t symbol_to_points(Symbol symbol)
 {
-    return static_cast<uint32_t>(symbol);
+    return static_cast<uint32_t>(symbol)+1;
+}
+
+uint32_t result_to_points(Result result)
+{
+    return static_cast<uint32_t>(result)*3;
 }
 
 struct Game
@@ -63,7 +78,7 @@ struct Game
     Symbol theirs;
     Symbol mine;
     Game(const std::string& symbols_str);
-    uint32_t getResult();
+    Result getResult();
     uint32_t calcTotalPoints();
 };
 
@@ -71,30 +86,22 @@ Game::Game(const std::string& symbols_str) : theirs(them_symbol_from_letter(symb
                                     mine(me_symbol_from_letter(symbols_str[2]))
 {}
 
-uint32_t Game::getResult()
+Result Game::getResult()
 {
+    if(win_array[theirs] == mine)
+    {
+        return LOSE;
+    }
     if(theirs == mine)
     {
-        //draw
-        return 3;
+        return DRAW;
     }
-    if(theirs == Symbol::ROCK && mine == Symbol::SCISSORS)
-    {
-        //loss
-        return 0;
-    }
-    if(theirs == Symbol::SCISSORS && mine == Symbol::ROCK)
-    {
-        //win
-        return 6;
-    }
-    bool i_win = mine > theirs;
-    return i_win ? 6 : 0;
+    return WIN;
 }
 
 uint32_t Game::calcTotalPoints()
 {
-    return static_cast<uint32_t>(mine) + getResult();
+    return symbol_to_points(mine) + result_to_points(getResult());
 }
 
 int main()
