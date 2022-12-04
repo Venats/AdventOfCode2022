@@ -1,3 +1,4 @@
+DAY=day3
 
 CPP=g++
 
@@ -19,7 +20,7 @@ UTIL_OBJ:=$(patsubst %, $(UTIL_OBJ_DIR)/%,$(UTIL_SRC:.cpp=.o))
 
 SRC:=$(wildcard $(SRC_DIR)/*.cpp)
 OBJ:=$(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-EXE:=$(BIN_DIR)/day3
+EXE:=$(BIN_DIR)/$(DAY)
 
 PPFLAGS= -I../util/src/
 CPPFLAGS= --std=gnu++17 \
