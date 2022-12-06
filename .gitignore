@@ -1,5 +1,5 @@
 .vscode/*
 *.code-workspace
 *.o
-bin/*
+*/bin/*
 day1/bin/day1
