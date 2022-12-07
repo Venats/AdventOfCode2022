@@ -1,5 +1,5 @@
 #include<algorithm>
-#include<utility>
+#include<functional>
 #include<iostream>
 #include<cstdint>
 #include<cstdlib>
@@ -20,19 +20,22 @@ struct File
 
 struct Directory
 {
-    Directory(const std::string& name) : m_name(name), m_files()
+    Directory(const std::string& name) : m_name(name), m_files(), m_dirs(), m_size(0)
     {}
     std::string m_name;
     std::vector<File> m_files;
     std::vector<Directory> m_dirs;
-    //could probably memoize or just do once after filesystem is build
+    mutable size_t m_size;
     size_t get_size() const
     {
-        size_t size = std::accumulate(m_files.begin(), m_files.end(), 0,
-                     [](size_t acc, const File& file){return acc + file.m_size;});
-        size += std::accumulate(m_dirs.begin(), m_dirs.end(), 0,
-                     [](size_t acc, const Directory& dir){return acc + dir.get_size();});
-        return size;
+        if(m_size == 0)
+        {
+            m_size = std::accumulate(m_files.begin(), m_files.end(), 0,
+                        [](size_t acc, const File& file){return acc + file.m_size;});
+            m_size += std::accumulate(m_dirs.begin(), m_dirs.end(), 0,
+                        [](size_t acc, const Directory& dir){return acc + dir.get_size();});
+        }
+        return m_size;
     }
 
     //note ptr only good as long as m_dirs isnt modified
@@ -104,38 +107,22 @@ void parse_line(std::stack<Directory*>& current_path, std::string&& cmd_str)
     current_path.top()->m_files.emplace_back(cmd_tokens[1], std::strtoul(cmd_tokens[0].c_str(), nullptr, 10));
 }
 
-std::vector<const Directory*> find_small_dirs(const Directory& cur_dir, size_t small_dir_size)
+std::vector<const Directory*> find_dirs_if(const Directory& cur_dir,
+    size_t pred_size_arg,
+    std::function<bool(const Directory&, size_t)> pred)
 {
     std::vector<const Directory*> ret;
-    size_t dir_size = cur_dir.get_size();
-    if(dir_size <= small_dir_size)
+    if(pred(cur_dir, pred_size_arg))
     {
         ret.emplace_back(&cur_dir);
     }
     for(const auto& dir : cur_dir.m_dirs)
     {
-        auto sub_dir_sizes = find_small_dirs(dir, small_dir_size);
+        auto sub_dir_sizes = find_dirs_if(dir, pred_size_arg, pred);
         std::move(std::begin(sub_dir_sizes), std::end(sub_dir_sizes), std::back_inserter(ret));
     }
     return ret;
 }
-
-std::vector<const Directory*> find_smallest_big_dirs(const Directory& cur_dir, size_t dir_size_min)
-{
-    std::vector<const Directory*> ret;
-    size_t dir_size = cur_dir.get_size();
-    if(dir_size >= dir_size_min)
-    {
-        ret.emplace_back(&cur_dir);
-    }
-    for(const auto& dir : cur_dir.m_dirs)
-    {
-        auto sub_dir_sizes = find_smallest_big_dirs(dir, dir_size_min);
-        std::move(std::begin(sub_dir_sizes), std::end(sub_dir_sizes), std::back_inserter(ret));
-    }
-    return ret;
-}
-
 
 size_t calc_space_needed(const Directory& dir)
 {
@@ -156,14 +143,18 @@ int main()
     }
 
 //part 1 stuff
-    std::vector<const Directory*> small_dirs = find_small_dirs(TOP_DIR, SMALL_DIR_MAX_SIZE);
+    std::vector<const Directory*> small_dirs = find_dirs_if(TOP_DIR, SMALL_DIR_MAX_SIZE,
+         [](const Directory& dir, size_t size){return dir.get_size() < size;});
+    
     size_t total = std::accumulate(small_dirs.begin(),small_dirs.end(),0, 
         [](size_t acc, const Directory* dir){return acc + dir->get_size();});
     std::cout << "part1: " << total << std::endl;
 
 //part 2 stuff
     size_t space_needed = calc_space_needed(TOP_DIR);
-    std::vector<const Directory*> dirs = find_smallest_big_dirs(TOP_DIR, space_needed);
+    std::vector<const Directory*> dirs = find_dirs_if(TOP_DIR, space_needed,
+        [](const Directory& dir, size_t size){return dir.get_size() >= size;});
+
     std::sort(dirs.begin(),dirs.end(),
             [](const Directory* dir1, const Directory* dir2) {return dir1->get_size() < dir2->get_size();});
     std::cout << "part2: " << dirs[0]->get_size() << std::endl;
