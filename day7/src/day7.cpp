@@ -25,6 +25,7 @@ struct Directory
     std::string m_name;
     std::vector<File> m_files;
     std::vector<Directory> m_dirs;
+    //could probably memoize or just do once after filesystem is build
     size_t get_size() const
     {
         size_t size = std::accumulate(m_files.begin(), m_files.end(), 0,
@@ -103,7 +104,7 @@ void parse_line(std::stack<Directory*>& current_path, std::string&& cmd_str)
     current_path.top()->m_files.emplace_back(cmd_tokens[1], std::strtoul(cmd_tokens[0].c_str(), nullptr, 10));
 }
 
-std::vector<const Directory*> find_small_dirs_sizes(const Directory& cur_dir, size_t small_dir_size)
+std::vector<const Directory*> find_small_dirs(const Directory& cur_dir, size_t small_dir_size)
 {
     std::vector<const Directory*> ret;
     size_t dir_size = cur_dir.get_size();
@@ -113,13 +114,13 @@ std::vector<const Directory*> find_small_dirs_sizes(const Directory& cur_dir, si
     }
     for(const auto& dir : cur_dir.m_dirs)
     {
-        auto sub_dir_sizes = find_small_dirs_sizes(dir, small_dir_size);
+        auto sub_dir_sizes = find_small_dirs(dir, small_dir_size);
         std::move(std::begin(sub_dir_sizes), std::end(sub_dir_sizes), std::back_inserter(ret));
     }
     return ret;
 }
 
-std::vector<const Directory*> find_smallest_big_dirs_sizes(const Directory& cur_dir, size_t dir_size_min)
+std::vector<const Directory*> find_smallest_big_dirs(const Directory& cur_dir, size_t dir_size_min)
 {
     std::vector<const Directory*> ret;
     size_t dir_size = cur_dir.get_size();
@@ -129,7 +130,7 @@ std::vector<const Directory*> find_smallest_big_dirs_sizes(const Directory& cur_
     }
     for(const auto& dir : cur_dir.m_dirs)
     {
-        auto sub_dir_sizes = find_smallest_big_dirs_sizes(dir, dir_size_min);
+        auto sub_dir_sizes = find_smallest_big_dirs(dir, dir_size_min);
         std::move(std::begin(sub_dir_sizes), std::end(sub_dir_sizes), std::back_inserter(ret));
     }
     return ret;
@@ -155,14 +156,14 @@ int main()
     }
 
 //part 1 stuff
-    std::vector<const Directory*> small_dirs = find_small_dirs_sizes(TOP_DIR, SMALL_DIR_MAX_SIZE);
+    std::vector<const Directory*> small_dirs = find_small_dirs(TOP_DIR, SMALL_DIR_MAX_SIZE);
     size_t total = std::accumulate(small_dirs.begin(),small_dirs.end(),0, 
         [](size_t acc, const Directory* dir){return acc + dir->get_size();});
     std::cout << "part1: " << total << std::endl;
 
 //part 2 stuff
     size_t space_needed = calc_space_needed(TOP_DIR);
-    std::vector<const Directory*> dirs = find_smallest_big_dirs_sizes(TOP_DIR, space_needed);
+    std::vector<const Directory*> dirs = find_smallest_big_dirs(TOP_DIR, space_needed);
     std::sort(dirs.begin(),dirs.end(),
             [](const Directory* dir1, const Directory* dir2) {return dir1->get_size() < dir2->get_size();});
     std::cout << "part2: " << dirs[0]->get_size() << std::endl;
