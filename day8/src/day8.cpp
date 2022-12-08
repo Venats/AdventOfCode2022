@@ -7,56 +7,30 @@
 
 using Tree = int;
 
-bool is_visible_left_down(size_t tree_idx, const std::vector<Tree>& tree)
+size_t get_viewing_distance_left_up(size_t tree_idx, const std::vector<Tree>& trees)
 {
-    int tree_size = tree[tree_idx];
-    for(ssize_t i = tree_idx-1; i >=0; i--)
-    {
-        if(tree_size <= tree[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool is_visible_right_up(size_t tree_idx, const std::vector<Tree>& tree)
-{
-    int tree_size = tree[tree_idx];
-    for(size_t i = tree_idx+1; i < tree.size(); i++)
-    {
-        if(tree_size <= tree[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-size_t get_viewing_distance_left_down(size_t tree_idx, const std::vector<Tree>& tree)
-{
-    int tree_size = tree[tree_idx];
+    int tree_size = trees[tree_idx];
     size_t viewing_distance = 0;
     for(ssize_t i = tree_idx-1; i >=0; i--)
     {
-        if(tree_size <= tree[i])
+        viewing_distance++;
+        if(tree_size <= trees[i])
         {
             break;
         }
-        viewing_distance++;
     }
+
     return viewing_distance;
 }
 
-size_t get_viewing_distance_right_up(size_t tree_idx, const std::vector<Tree>& tree)
+size_t get_viewing_distance_right_down(size_t tree_idx, const std::vector<Tree>& trees)
 {
-    int tree_size = tree[tree_idx];
+    int tree_size = trees[tree_idx];
     size_t viewing_distance = 0;
-    for(size_t i = tree_idx+1; i < tree.size(); i++)
+    for(size_t i = tree_idx+1; i < trees.size(); i++)
     {
         viewing_distance++;
-        if(tree_size <= tree[i])
+        if(tree_size <= trees[i])
         {
             break;
         }
@@ -69,14 +43,17 @@ bool is_visible(size_t tree_row_idx,
         const std::vector<Tree>& tree_row,
         const std::vector<Tree>& tree_col)
 {
-    if(tree_row_idx == 0 || tree_col_idx == 0)
+    if(tree_row_idx == 0 ||
+         tree_col_idx == 0 ||
+         tree_row_idx == tree_row.size()-1 ||
+         tree_col_idx == tree_col.size()-1)
     {
         return true;
     }
-    return is_visible_left_down(tree_row_idx, tree_row) ||
-        is_visible_right_up(tree_row_idx, tree_row) ||
-        is_visible_left_down(tree_col_idx, tree_col) ||
-        is_visible_right_up(tree_col_idx, tree_col);
+    return (get_viewing_distance_left_up(tree_row_idx, tree_row) == tree_row_idx && tree_row[tree_row_idx] > tree_row[0]) ||
+        ( (get_viewing_distance_right_down(tree_row_idx, tree_row) == tree_row.size() - tree_row_idx - 1) && tree_row[tree_row_idx] > tree_row.back()) ||
+        (get_viewing_distance_left_up(tree_col_idx, tree_col) == tree_col_idx && tree_col[tree_col_idx] > tree_col[0]) ||
+        ( (get_viewing_distance_right_down(tree_col_idx, tree_col) ==  tree_col.size() - tree_col_idx - 1) && tree_col[tree_col_idx] > tree_col.back());
 }
 
 size_t get_scenic_score(size_t tree_row_idx, 
@@ -84,10 +61,10 @@ size_t get_scenic_score(size_t tree_row_idx,
         const std::vector<Tree>& tree_row,
         const std::vector<Tree>& tree_col)
 {
-    return get_viewing_distance_left_down(tree_row_idx, tree_row) *
-     get_viewing_distance_right_up(tree_row_idx, tree_row)  *
-     get_viewing_distance_left_down(tree_col_idx, tree_col) *
-     get_viewing_distance_right_up(tree_col_idx, tree_col) ;
+    return get_viewing_distance_left_up(tree_row_idx, tree_row) *
+     get_viewing_distance_right_down(tree_row_idx, tree_row)  *
+     get_viewing_distance_left_up(tree_col_idx, tree_col) *
+     get_viewing_distance_right_down(tree_col_idx, tree_col) ;
 }
 
 
