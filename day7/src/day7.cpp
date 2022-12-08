@@ -61,7 +61,8 @@ std::vector<std::string> tokenize_string(std::string&& str, const std::string& d
 {
     size_t pos = 0;
     std::vector<std::string> tokens;
-    while ((pos = str.find(delimiter)) != std::string::npos) {
+    while ((pos = str.find(delimiter)) != std::string::npos)
+    {
         tokens.push_back(str.substr(0, pos));
         str.erase(0, pos + delimiter.length());
     }
@@ -108,8 +109,8 @@ void parse_line(std::stack<Directory*>& current_path, std::string&& cmd_str)
 }
 
 std::vector<const Directory*> find_dirs_if(const Directory& cur_dir,
-    size_t pred_size_arg,
-    std::function<bool(const Directory&, size_t)> pred)
+                                        size_t pred_size_arg,
+                                        std::function<bool(const Directory&, size_t)> pred)
 {
     std::vector<const Directory*> ret;
     if(pred(cur_dir, pred_size_arg))
