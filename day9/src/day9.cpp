@@ -34,26 +34,26 @@ struct HeadTailPair
     }
     void move_head(const Direction& dir)
     {
-            switch(dir)
-            {
-            case(UP):
-                head.second++;
-            break;
-        
-            case(DOWN):
-                head.second--;
-            break;
+        switch(dir)
+        {
+        case(UP):
+            head.second++;
+        break;
+    
+        case(DOWN):
+            head.second--;
+        break;
 
-            case(LEFT):
-                head.first--;
-            break;
+        case(LEFT):
+            head.first--;
+        break;
 
-            case(RIGHT):
-                head.first++;
-            break;
-            default:
-            break;
-            }
+        case(RIGHT):
+            head.first++;
+        break;
+        default:
+        break;
+        }
     }
     void move_tail(const std::pair<int,int>& head_position)
     {
