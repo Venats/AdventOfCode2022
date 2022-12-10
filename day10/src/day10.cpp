@@ -77,7 +77,6 @@ struct Circuit
         cycle++;
         if(std::find(SPECIAL_CYCLES.cbegin(), SPECIAL_CYCLES.cend(), cycle) != SPECIAL_CYCLES.cend())
         {
-            std::cout << "reg x: " << reg_x << std::endl;
             special_cycle_reg_values.emplace_back(cycle*reg_x);
         }
     }
@@ -117,7 +116,7 @@ int main()
     {
         for(const auto& pixle : row)
         {
-            std::cout <<(char)pixle;
+            std::cout << pixle;
         }
         std::cout << std::endl;
     }
