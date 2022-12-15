@@ -1,4 +1,4 @@
-DAY=day4
+DAY=day13
 
 CPP=g++
 
