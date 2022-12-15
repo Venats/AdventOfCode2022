@@ -37,10 +37,8 @@ std::vector<std::string> tokenize_list(const std::string& string)
         }
         else if(str[i] == ',' && in_list == 0)
         {
-            // std::cout << "token = " << current_token.str() << std::endl;
             tokens.push_back(current_token.str());
             current_token.str("");
-            // std::cout << "after clear token = " << current_token.str() << std::endl;
         }
         else
         {
